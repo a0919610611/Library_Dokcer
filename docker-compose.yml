@@ -1,0 +1,42 @@
+version: "2"
+services:
+    dbdata:
+        image: mariadb:10.0
+        entrypoint: /bin/bash
+
+    db:
+        image: mariadb:10.0
+        mem_limit: 1024m
+        volumes_from:
+            - dbdata
+        env_file:
+            - ./config.env
+        expose:
+           - "3306"
+
+    web:
+        build: ./web
+        volumes:
+            - /Library/static_root
+        env_file:
+            - ./config.env
+        expose:
+            - "8080"
+        depends_on:
+            - db
+        links:
+            - db:db
+
+    webserver:
+        build: ./webserver
+        ports:
+            - "80:80"
+        depends_on:
+            - web
+        volumes_from:
+            - web
+        links:
+            - web:web
+
+        
+
